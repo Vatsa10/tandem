@@ -215,7 +215,18 @@ func runShell(ctx context.Context, command string) string {
 	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 	var buf bytes.Buffer
-	cmd := exec.CommandContext(ctx, "bash", "-lc", command)
+	// The model emits unix-style commands. Prefer bash if present (git bash on
+	// Windows), else fall back to cmd.exe so at least native commands run.
+	var cmd *exec.Cmd
+	if goruntime.GOOS == "windows" {
+		if _, err := exec.LookPath("bash"); err == nil {
+			cmd = exec.CommandContext(ctx, "bash", "-lc", command)
+		} else {
+			cmd = exec.CommandContext(ctx, "cmd", "/c", command)
+		}
+	} else {
+		cmd = exec.CommandContext(ctx, "bash", "-lc", command)
+	}
 	cmd.Stdout = &buf
 	cmd.Stderr = &buf
 	err := cmd.Run()

@@ -197,16 +197,27 @@ Deno.serve({
   },
 }, async (req) => {
   const { pathname } = new URL(req.url);
+  const t0 = performance.now();
+  const log = (status: number) => {
+    // Log everything except the noisy status-poll the UI fires every second.
+    if (pathname === "/api/session/state" || pathname === "/api/status") return;
+    const ms = (performance.now() - t0).toFixed(0);
+    console.log(`[http] ${req.method} ${pathname} -> ${status} (${ms}ms)`);
+  };
   if (pathname.startsWith("/api/")) {
     try {
       const r = await api(req, pathname);
-      if (r) return r;
-      return Response.json({ ok: false, error: "unknown endpoint" }, { status: 404 });
+      const res = r ?? Response.json({ ok: false, error: "unknown endpoint" }, { status: 404 });
+      log(res.status);
+      return res;
     } catch (e) {
+      console.error(`[http] ${req.method} ${pathname} -> 500`, e);
       return Response.json({ ok: false, error: String(e) }, { status: 500 });
     }
   }
-  return serveStatic(pathname);
+  const res = await serveStatic(pathname);
+  log(res.status);
+  return res;
 });
 
 // ---------------------------------------------------------------------------

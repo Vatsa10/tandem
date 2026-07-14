@@ -189,6 +189,12 @@ func (ms *MeetSession) Join(displayName string) error {
 		userDataDir, _ = os.MkdirTemp("", "tandem-chrome-*")
 	} else {
 		os.MkdirAll(userDataDir, 0o755)
+		// Clear a stale singleton lock left by a previous tandem Chrome that didn't
+		// exit cleanly, so a restart never fails with "profile in use". This only
+		// touches tandem's own profile — never the user's real Chrome.
+		for _, n := range []string{"SingletonLock", "SingletonCookie", "SingletonSocket"} {
+			os.Remove(filepath.Join(userDataDir, n))
+		}
 	}
 	ms.userDataDir = userDataDir
 	chrome := chromePath()
@@ -234,14 +240,17 @@ func (ms *MeetSession) Join(displayName string) error {
 		// injected hook — no PulseAudio/Xvfb. This is the supported desktop path.
 		// ponytail: pulse.go/xvfb.go compile here but only run in the Linux branch.
 		silence, _ := silenceWAV()
-		headless := os.Getenv("TANDEM_HEADLESS") == "1"
-		log.Printf("[meet] chrome=%s headless=%v (native desktop)", chrome, headless)
+		// "Hidden" mode: true --headless=new breaks Google Meet (it renders a
+		// different page / stalls automation). The reliable way to hide the window
+		// is what the Linux container does with Xvfb — run HEADED Chrome but keep it
+		// out of sight. On Windows we park the window far off-screen instead.
+		hidden := os.Getenv("TANDEM_HEADLESS") == "1"
+		log.Printf("[meet] chrome=%s hidden=%v (native desktop, headed)", chrome, hidden)
 		opts = []chromedp.ExecAllocatorOption{
 			chromedp.ExecPath(chrome),
 			chromedp.NoFirstRun,
 			chromedp.NoDefaultBrowserCheck,
 			chromedp.UserDataDir(userDataDir),
-			chromedp.Flag("headless", headless),
 			chromedp.Flag("app", ms.MeetURL),
 			chromedp.Flag("disable-blink-features", "AutomationControlled"),
 			chromedp.Flag("disable-dev-shm-usage", true),
@@ -257,6 +266,15 @@ func (ms *MeetSession) Join(displayName string) error {
 			chromedp.Flag("mute-audio", true),
 			chromedp.Flag("enable-features", "AutoGrantCameraMicAccess"),
 			chromedp.WindowSize(1280, 900),
+		}
+		if hidden {
+			// Headed but parked off-screen: Meet behaves exactly like the visible
+			// path, the user just never sees the window. Minimized would still flash;
+			// a large negative position keeps it fully off any monitor.
+			opts = append(opts,
+				chromedp.Flag("window-position", "-32000,-32000"),
+				chromedp.Flag("window-size", "1280,900"),
+			)
 		}
 	}
 	var allocCtx context.Context

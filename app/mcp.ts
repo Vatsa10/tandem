@@ -64,6 +64,7 @@ class MCPClient {
         if (line.trim()) {
           this.logs.push(line);
           if (this.logs.length > 500) this.logs.shift();
+          console.log("[engine] " + line); // live to the terminal too
         }
       }
     }
