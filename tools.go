@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	goruntime "runtime"
 	"strings"
 	"time"
 )
@@ -141,19 +142,28 @@ func consultAgent(ctx context.Context, question string) string {
 	ctx, cancel := context.WithTimeout(ctx, 4*time.Minute)
 	defer cancel()
 
-	var agent, tmpl string
+	var agent string
+	var argv []string // CLI + args, passed directly (no shell)
 	switch {
 	case haveCmd("claude"):
-		agent, tmpl = "Claude Code", "claude -p %s"
+		agent, argv = "Claude Code", []string{"claude", "-p", question}
 	case haveCmd("codex"):
-		agent, tmpl = "Codex", "codex exec %s"
+		agent, argv = "Codex", []string{"codex", "exec", question}
 	default:
 		return "No coding agent found. Install Claude Code (`claude`) or Codex (`codex`) to use consult_agent."
 	}
 
-	cmdline := fmt.Sprintf(tmpl, shellQuote(question))
 	var buf bytes.Buffer
-	cmd := exec.CommandContext(ctx, "bash", "-lc", cmdline)
+	var cmd *exec.Cmd
+	if goruntime.GOOS == "windows" {
+		// claude/codex are .cmd shims on Windows — they need cmd.exe to run.
+		cmd = exec.CommandContext(ctx, "cmd", append([]string{"/c"}, argv...)...)
+	} else {
+		// Unix: go through a login shell so a GUI-launched parent's minimal PATH
+		// still resolves the CLI (Homebrew/Nix bin dirs).
+		cmdline := strings.Join([]string{argv[0], strings.Join(argv[1:len(argv)-1], " "), shellQuote(question)}, " ")
+		cmd = exec.CommandContext(ctx, "bash", "-lc", cmdline)
+	}
 	cmd.Stdout = &buf
 	cmd.Stderr = &buf
 	err := cmd.Run()

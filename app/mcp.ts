@@ -139,12 +139,16 @@ let client: MCPClient | null = null;
 let session: Session | null = null;
 
 function sessionEnv(): Record<string, string> {
-  // Force the native, no-Docker run: real Chrome (non-headless so the user can
-  // complete any Google sign-in), persistent profile + logs under ~/.tandem.
-  return {
+  // Native no-Docker run: persistent profile + logs under ~/.tandem. Chrome runs
+  // headless by default (no window pops up; the app UI is the surface). Set
+  // TANDEM_SHOW_WINDOW=1 to show the real Chrome — needed the first time to
+  // complete a Google sign-in on the persistent profile.
+  const env: Record<string, string> = {
     TANDEM_CHROME_PROFILE: `${TANDEM_DIR}/chrome`,
     TANDEM_LOG_DIR: `${TANDEM_DIR}/logs`,
   };
+  if (Deno.env.get("TANDEM_SHOW_WINDOW") !== "1") env.TANDEM_HEADLESS = "1";
+  return env;
 }
 
 // Accept a bare Meet code (abc-defg-hij) or a full URL.
