@@ -1,7 +1,7 @@
 import { desc, eq } from "drizzle-orm";
-import { answerQuestionText } from "@/lib/ai/rag";
 import { db } from "@/lib/db/client";
 import { liveChatMessages, meetings } from "@/lib/db/schema";
+import { answerWithTools } from "@/lib/agent/chat-agent";
 import { BOT_DISPLAY_NAME, extractQuestion } from "@/lib/agent/trigger";
 import { sendChatMessage } from "./client";
 
@@ -77,15 +77,23 @@ export async function handleLiveChatMessage(
 
   const conversationHistory = await getRecentHistory(meeting.id);
 
-  const answer = await answerQuestionText(
-    question,
+  // Same tools as the voice agent — it can search past meetings, check the
+  // calendar, or search the web rather than answering from retrieval alone.
+  const answer = await answerWithTools(
     {
+      session: {
+        id: "chat",
+        meetingId: meeting.id,
+        userId: meeting.userId,
+        secondsUsed: 0,
+      },
+      meetingId: meeting.id,
       userId: meeting.userId,
-      ...(meeting.categoryId
-        ? { categoryId: meeting.categoryId }
-        : { uncategorizedOnly: true }),
+      categoryId: meeting.categoryId,
+      recallBotId: botId,
     },
-    { conversationHistory },
+    question,
+    conversationHistory,
   );
 
   const limit =
@@ -93,8 +101,19 @@ export async function handleLiveChatMessage(
   const truncated = truncate(answer, limit);
 
   await db.insert(liveChatMessages).values([
-    { meetingId: meeting.id, role: "user", participantName, text: question },
-    { meetingId: meeting.id, role: "assistant", text: truncated },
+    {
+      meetingId: meeting.id,
+      role: "user",
+      participantName,
+      text: question,
+      channel: "chat",
+    },
+    {
+      meetingId: meeting.id,
+      role: "assistant",
+      text: truncated,
+      channel: "chat",
+    },
   ]);
 
   await sendChatMessage(botId, truncated);
