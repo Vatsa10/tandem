@@ -81,6 +81,13 @@ export function ruleGate(
   const since = turnsSinceBotSpoke(transcript, botName);
   if (since === 0) return { decision: "speak", reason: "follow-up to the bot" };
 
+  // "Bob, can you review my PR?" is a question, but it is aimed at Bob.
+  // A leading capitalised name and comma is the clearest signal a human
+  // is addressing another human, and answering it would be barging in.
+  if (/^[A-Z][a-z]+,/.test(text.trim())) {
+    return { decision: "silent", reason: "addressed to someone else" };
+  }
+
   if (text.trim().endsWith("?")) {
     return { decision: "hand", reason: "open question" };
   }
