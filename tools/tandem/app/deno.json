@@ -1,0 +1,23 @@
+{
+  "tasks": {
+    "start": "deno run -A main.ts",
+    "serve": "deno run -A main.ts",
+    "build:win": "deno compile -A --no-check --icon ./icons/app.ico --include ./web --include ../tandem.exe --output ./dist/tandem-app.exe main.ts",
+    "dev": "deno desktop --hmr -A --include ./web --include ../tandem main.ts",
+    "build": "deno desktop -A --include ./web --include ../tandem --output ./dist/Tandem.app main.ts"
+  },
+  "desktop": {
+    "app": {
+      "name": "Tandem",
+      "identifier": "com.vatsa.tandem",
+      "icons": {
+        "macos": "./icons/app.icns",
+        "windows": "./icons/app.ico",
+        "linux": "./icons/app-512.png"
+      }
+    },
+    "output": {
+      "macos": "./dist/Tandem.app"
+    }
+  }
+}
