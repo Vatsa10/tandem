@@ -1,5 +1,8 @@
+import { eq } from "drizzle-orm";
+import { createAgentSession } from "@/lib/agent/sessions";
 import { getCurrentUserId } from "@/lib/auth";
 import { db } from "@/lib/db/client";
+import { env } from "@/lib/env";
 import { findActiveMeetingForUrl } from "@/lib/db/meetings";
 import { meetings } from "@/lib/db/schema";
 import { rateLimit } from "@/lib/rate-limit";
@@ -8,10 +11,17 @@ import { BOT_DISPLAY_NAME } from "@/lib/recall/live-chat";
 import { detectPlatform } from "@/lib/recall/platform";
 
 export async function POST(request: Request) {
-  const { meetingUrl, recordVideo, recordAudio } = await request.json();
+  const { meetingUrl, mode = "notetaker", recordVideo, recordAudio } =
+    await request.json();
 
   if (!meetingUrl || typeof meetingUrl !== "string") {
     return Response.json({ error: "meetingUrl is required" }, { status: 400 });
+  }
+  if (mode !== "notetaker" && mode !== "live") {
+    return Response.json(
+      { error: "mode must be 'notetaker' or 'live'" },
+      { status: 400 },
+    );
   }
   if (recordVideo !== undefined && typeof recordVideo !== "boolean") {
     return Response.json({ error: "recordVideo must be a boolean" }, { status: 400 });
@@ -39,6 +49,47 @@ export async function POST(request: Request) {
     );
   }
 
+  // Live mode has a chicken-and-egg: the agent page URL carries a token
+  // bound to the meeting row, but the bot needs that URL at creation. So
+  // the row is inserted first with a placeholder bot id, then patched once
+  // Recall returns the real one.
+  if (mode === "live") {
+    const [pending] = await db
+      .insert(meetings)
+      .values({
+        userId,
+        // The column is NOT NULL and unique, so the placeholder has to be
+        // unique too — not an empty string.
+        recallBotId: `pending:${crypto.randomUUID()}`,
+        platform: detectPlatform(meetingUrl),
+        meetingUrl,
+        status: "joining",
+        mode,
+      })
+      .returning();
+
+    const token = await createAgentSession(pending.id, userId);
+
+    const liveBot = await createBot({
+      meetingUrl,
+      botName: BOT_DISPLAY_NAME,
+      recordVideo,
+      recordAudio,
+      outputMediaUrl: `${env.APP_BASE_URL}/agent/${token}`,
+    });
+
+    const [meeting] = await db
+      .update(meetings)
+      .set({
+        recallBotId: liveBot.id,
+        status: liveBot.status_changes.at(-1)?.code ?? "joining",
+      })
+      .where(eq(meetings.id, pending.id))
+      .returning();
+
+    return Response.json({ meeting }, { status: 201 });
+  }
+
   const bot = await createBot({
     meetingUrl,
     botName: BOT_DISPLAY_NAME,
@@ -55,6 +106,7 @@ export async function POST(request: Request) {
       platform: detectPlatform(meetingUrl),
       meetingUrl,
       status: latestStatus,
+      mode,
     })
     .returning();
 
