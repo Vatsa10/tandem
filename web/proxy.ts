@@ -8,9 +8,15 @@ import { clerkMiddleware } from "@clerk/nextjs/server";
 // work at all.
 export default clerkMiddleware();
 
+// `/agent/*` and `/api/agent/*` are excluded deliberately: Recall's browser
+// loads the agent page with no cookies and no Clerk session, and those
+// routes authenticate with an opaque per-meeting token instead (see
+// lib/agent/sessions.ts). Routing them through Clerk gains nothing and
+// would break the bot the moment anyone adds auth.protect() here.
 export const config = {
   matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    "/(api|trpc)(.*)",
+    "/((?!agent|api/agent|_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/api(?!/agent)(.*)",
+    "/trpc(.*)",
   ],
 };
