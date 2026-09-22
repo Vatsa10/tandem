@@ -48,6 +48,7 @@ jobs:
 
       - name: Build the tandem engine (Go)
         run: go build -o tandem .
+        working-directory: tools/tandem
 
       - name: Import signing certificate
         if: env.HAS_CERT == 'true'
@@ -66,7 +67,7 @@ jobs:
           rm -f /tmp/cert.p12
 
       - name: Build, sign, notarize
-        working-directory: app
+        working-directory: tools/tandem/app
         env:
           NOTARY_KEY_JSON_CONTENT: ${{ secrets.NOTARY_KEY_JSON }}
         run: |
@@ -82,10 +83,10 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: Tandem-${{ matrix.arch }}
-          path: app/dist/Tandem-${{ matrix.arch }}.dmg
+          path: tools/tandem/app/dist/Tandem-${{ matrix.arch }}.dmg
 
       - name: Attach to release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: app/dist/Tandem-${{ matrix.arch }}.dmg
+          files: tools/tandem/app/dist/Tandem-${{ matrix.arch }}.dmg
