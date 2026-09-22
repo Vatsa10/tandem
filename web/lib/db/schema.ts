@@ -84,6 +84,9 @@ export const meetings = pgTable("meetings", {
   startedAt: timestamp("started_at", { withTimezone: true }),
   endedAt: timestamp("ended_at", { withTimezone: true }),
   status: text("status").notNull(), // mirrors Recall bot lifecycle status
+  // 'notetaker' — record and answer afterwards. 'live' — also join the
+  // conversation out loud via the Output Media agent page.
+  mode: text("mode").notNull().default("notetaker"),
   recordingVideoUrl: text("recording_video_url"),
   recordingAudioUrl: text("recording_audio_url"),
   // Post-meeting intelligence — filled after transcript is ready.
@@ -134,8 +137,33 @@ export const liveChatMessages = pgTable("live_chat_messages", {
     .notNull()
     .references(() => meetings.id),
   role: text("role").notNull(), // 'user' | 'assistant'
+  // 'chat' — typed in the meeting chat panel. 'voice' — spoken by or to
+  // the live agent. Both feed the same conversation history, so the gate
+  // and the chat responder see one another's turns.
+  channel: text("channel").notNull().default("chat"),
   participantName: text("participant_name"),
   text: text("text").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// Credential for the Output Media agent page. Recall loads that page with
+// no Clerk session, so this opaque token is the only thing standing
+// between the public internet and a meeting's RAG corpus. Short-lived,
+// single-meeting, and it carries the Realtime second-budget so the page
+// cannot extend its own session.
+export const agentSessions = pgTable("agent_sessions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  token: text("token").notNull().unique(),
+  meetingId: uuid("meeting_id")
+    .notNull()
+    .references(() => meetings.id, { onDelete: "cascade" }),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  secondsUsed: integer("seconds_used").notNull().default(0),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
