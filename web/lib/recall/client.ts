@@ -127,6 +127,19 @@ export async function createBot(params: CreateBotParams): Promise<RecallBot> {
           recordAudio: params.recordAudio,
         }),
       automatic_leave: getAutomaticLeaveConfig(),
+      // Recall loads this page in its own browser and streams the page's
+      // audio and video into the meeting — that page is the live agent.
+      // Sibling of recording_config, not nested inside it.
+      ...(params.outputMediaUrl
+        ? {
+            output_media: {
+              camera: {
+                kind: "webpage",
+                config: { url: params.outputMediaUrl },
+              },
+            },
+          }
+        : {}),
     }),
   });
 }

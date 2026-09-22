@@ -14,6 +14,9 @@ export interface CreateBotParams {
   recordAudio?: boolean;
   /** Overrides the built recording config (including the video/audio flags above) entirely. */
   recordingConfig?: Record<string, unknown>;
+  /** Absolute URL of the Output Media page Recall streams into the call.
+      Set only for live-mode bots; omitted for notetaker bots. */
+  outputMediaUrl?: string;
 }
 
 export interface RecallBotStatusChange {
