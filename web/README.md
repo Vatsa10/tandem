@@ -17,6 +17,9 @@ Full architecture, API surface, data model, and design decisions: **[project.md]
 - **Meeting intelligence** — summary, action items, highlights after `bot.done`
 - **RAG chat** — per-meeting or category-scoped Q&A with citations
 - **Live `@Tandem` chat** — ask questions in the meeting chat during the call
+- **Live voice agent** — in `live` mode Tandem joins the conversation out loud: it
+  hears the call, decides when it is being addressed, and speaks an answer grounded
+  in the transcript so far and past meetings
 - **Categories** — group related meetings and chat across that series
 - **Export** — transcript as TXT, SRT, or PDF
 - **Auth** — Clerk multi-user with resource ownership
@@ -95,6 +98,7 @@ Create `.env.local` with:
 | `RECALL_WEBHOOK_SECRET` | Svix webhook signing secret |
 | `GEMINI_API_KEY` | Gemini embeddings |
 | `DEEPSEEK_API_KEY` | Chat, classifier, meeting intelligence |
+| `OPENAI_API_KEY` | Realtime speech for the live voice agent (only needed for `live` mode) |
 | `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET` | Google Calendar OAuth |
 | `MICROSOFT_OAUTH_CLIENT_ID` / `MICROSOFT_OAUTH_CLIENT_SECRET` | Outlook OAuth |
 | `APP_BASE_URL` | Public origin, no trailing slash (webhooks / realtime) |
