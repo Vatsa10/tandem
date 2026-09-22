@@ -57,6 +57,13 @@
       "when": 1790063715674,
       "tag": "0007_sparkling_cable",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790064499338,
+      "tag": "0008_nostalgic_brood",
+      "breakpoints": true
     }
   ]
 }
