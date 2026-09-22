@@ -1,0 +1,1 @@
+ALTER TABLE "calendar_connections" ADD COLUMN "auto_record" boolean DEFAULT false NOT NULL;
