@@ -148,6 +148,30 @@ export const liveChatMessages = pgTable("live_chat_messages", {
     .defaultNow(),
 });
 
+// Credential for a machine that acts on a user's behalf — specifically the
+// local MCP tool in tools/tandem, so the voice agent running on someone's
+// laptop can search their meeting corpus. Clerk sessions are for browsers;
+// a CLI has no cookie jar, so it carries one of these instead.
+//
+// Only the SHA-256 of the key is stored. A leaked database row therefore
+// cannot be replayed against the API, and the plaintext is shown once at
+// creation and never again.
+export const apiKeys = pgTable("api_keys", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  keyHash: text("key_hash").notNull().unique(),
+  // The leading characters of the key, for telling rows apart in a list
+  // without storing anything that could be used to authenticate.
+  keyPrefix: text("key_prefix").notNull(),
+  lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 // Credential for the Output Media agent page. Recall loads that page with
 // no Clerk session, so this opaque token is the only thing standing
 // between the public internet and a meeting's RAG corpus. Short-lived,
