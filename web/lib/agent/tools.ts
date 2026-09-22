@@ -20,14 +20,21 @@
 
 export type ToolLocation = "server" | "client";
 
+/** Narrow on purpose: these literals are what JSON Schema consumers (the
+    Realtime session and the AI SDK's `jsonSchema`) accept, and a plain
+    `string` here fails to type-check against both. */
+export type ToolParameterType = "string" | "number" | "boolean";
+
+export interface ToolParameters {
+  type: "object";
+  properties: Record<string, { type: ToolParameterType; description: string }>;
+  required: string[];
+}
+
 export interface ToolDefinition {
   name: string;
   description: string;
-  parameters: {
-    type: "object";
-    properties: Record<string, { type: string; description: string }>;
-    required: string[];
-  };
+  parameters: ToolParameters;
   /** `client` runs in the agent page (it owns the live transcript buffer);
       `server` runs behind /api/agent/tool, where the database, the Recall
       key and the OpenAI key live. */
