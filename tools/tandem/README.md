@@ -57,6 +57,26 @@ required.
 - It shows a small dithering-shader avatar whose color tracks its state — idle,
   listening, thinking, speaking.
 
+## Meeting memory (optional)
+
+Tandem's voice agent normally knows only the call it is sitting in. Point it at
+a Tandem web deployment and it also gets `search_meetings` and
+`list_upcoming_meetings` — the transcripts and calendar the web product
+records:
+
+```powershell
+claude mcp add tandem `
+  -e TANDEM_VOICE=realtime `
+  -e TANDEM_WEB_URL=https://your-deployment `
+  -e TANDEM_API_KEY=tdm_... `
+  -- C:\path	o	andem.exe
+```
+
+Create the key in the web app under **Settings → API keys**. It is shown once,
+stored only as a SHA-256 hash, and can be revoked there at any time. With
+either variable unset the tools are simply not offered and nothing else
+changes.
+
 ## Desktop app (optional UI)
 
 Prefer a UI over driving it from Claude Code directly? [`app/`](app/) is a small
