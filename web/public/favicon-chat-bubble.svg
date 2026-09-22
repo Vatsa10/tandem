@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Background -->
+  <rect x="4" y="4" width="92" height="92" rx="20" fill="#f1eee4" />
+
+  <!-- Speech bubble body -->
+  <rect x="16" y="18" width="64" height="48" rx="16" fill="#15171d" />
+  <!-- Speech bubble tail -->
+  <polygon points="42,66 37,84 50,66" fill="#15171d" />
+
+  <!-- Transcript lines inside the bubble -->
+  <rect x="28" y="28" width="40" height="5" rx="2.5" fill="#f1eee4" opacity="0.9" />
+  <rect x="28" y="38" width="30" height="5" rx="2.5" fill="#f1eee4" opacity="0.55" />
+  <rect x="28" y="48" width="34" height="5" rx="2.5" fill="#f1eee4" opacity="0.3" />
+
+  <!-- Recording dot -->
+  <circle cx="86" cy="22" r="5.5" fill="#ff3b2f" />
+  <circle cx="86" cy="22" r="9" stroke="#ff3b2f" stroke-width="1.5" opacity="0.35" />
+</svg>

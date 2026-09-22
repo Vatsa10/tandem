@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Background -->
+  <rect x="4" y="4" width="92" height="92" rx="20" fill="#f1eee4" />
+
+  <!-- Audio waveform bars — centered, symmetric -->
+  <rect x="14" y="38" width="8" height="24" rx="4" fill="#15171d" />
+  <rect x="26" y="22" width="8" height="56" rx="4" fill="#15171d" />
+  <rect x="38" y="14" width="8" height="72" rx="4" fill="#15171d" />
+  <rect x="50" y="22" width="8" height="56" rx="4" fill="#15171d" />
+  <rect x="62" y="38" width="8" height="24" rx="4" fill="#15171d" />
+
+  <!-- Recording dot with pulse ring -->
+  <circle cx="86" cy="22" r="5.5" fill="#ff3b2f" />
+  <circle cx="86" cy="22" r="9" stroke="#ff3b2f" stroke-width="1.5" opacity="0.35" />
+</svg>
