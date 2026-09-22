@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
-import { CalendarDays, MessageSquareText, Video } from "lucide-react";
+import { CalendarDays, KeyRound, MessageSquareText, Video } from "lucide-react";
 import { ToastProvider } from "@/components/ui/toaster";
 
 const navItems = [
   { href: "/meetings", label: "Meetings", icon: Video },
   { href: "/chat", label: "Chat", icon: MessageSquareText },
   { href: "/settings/calendar", label: "Calendar", icon: CalendarDays },
+  { href: "/settings/api-keys", label: "API keys", icon: KeyRound },
 ];
 
 export default function DashboardLayout({
