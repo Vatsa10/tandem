@@ -16,11 +16,6 @@ const COLORS: Record<AgentState, string> = {
 export default function Avatar({ state }: { state: AgentState }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Read inside the animation loop rather than restarting the loop on
-  // every state change — the loop runs for the whole meeting.
-  const stateRef = useRef<AgentState>(state);
-  stateRef.current = state;
-
   useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
@@ -37,13 +32,13 @@ export default function Avatar({ state }: { state: AgentState }) {
 
       // Breathing pulse — slow when idle, quicker while speaking, so the
       // tile reads as alive without being distracting.
-      const speed = stateRef.current === "speaking" ? 400 : 1400;
+      const speed = state === "speaking" ? 400 : 1400;
       const pulse = 0.5 + 0.5 * Math.sin(now / speed);
       const radius = Math.min(width, height) * (0.22 + 0.05 * pulse);
 
       context.beginPath();
       context.arc(width / 2, height / 2, radius, 0, Math.PI * 2);
-      context.fillStyle = COLORS[stateRef.current];
+      context.fillStyle = COLORS[state];
       context.globalAlpha = 0.85;
       context.fill();
       context.globalAlpha = 1;
@@ -59,7 +54,10 @@ export default function Avatar({ state }: { state: AgentState }) {
     frame = requestAnimationFrame(draw);
 
     return () => cancelAnimationFrame(frame);
-  }, []);
+    // The loop restarts when the state changes. There are only four
+    // states and they change at conversational pace, so re-arming the
+    // animation is cheaper than keeping a ref in sync during render.
+  }, [state]);
 
   return (
     <canvas
