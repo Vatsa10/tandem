@@ -20,6 +20,12 @@ Full architecture, API surface, data model, and design decisions: **[project.md]
 - **Live voice agent** — in `live` mode Tandem joins the conversation out loud: it
   hears the call, decides when it is being addressed, and speaks an answer grounded
   in the transcript so far and past meetings
+- **Shared tools** — both the voice agent and the `@Tandem` chat responder call the
+  same tools: `search_meetings`, `get_transcript`, `get_participants`,
+  `get_meeting_notes`, `list_upcoming_meetings`, `web_search`, `send_chat`, and
+  `leave_meeting` (`lib/agent/tools.ts`)
+- **Machine API keys** — hashed, revocable keys (Settings → API keys) that let the
+  local MCP server in `tools/tandem` search this meeting corpus
 - **Categories** — group related meetings and chat across that series
 - **Export** — transcript as TXT, SRT, or PDF
 - **Auth** — Clerk multi-user with resource ownership
@@ -98,7 +104,7 @@ Create `.env.local` with:
 | `RECALL_WEBHOOK_SECRET` | Svix webhook signing secret |
 | `GEMINI_API_KEY` | Gemini embeddings |
 | `DEEPSEEK_API_KEY` | Chat, classifier, meeting intelligence |
-| `OPENAI_API_KEY` | Realtime speech for the live voice agent (only needed for `live` mode) |
+| `OPENAI_API_KEY` | Realtime speech for the live voice agent, and `web_search` (only needed for `live` mode) |
 | `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET` | Google Calendar OAuth |
 | `MICROSOFT_OAUTH_CLIENT_ID` / `MICROSOFT_OAUTH_CLIENT_SECRET` | Outlook OAuth |
 | `APP_BASE_URL` | Public origin, no trailing slash (webhooks / realtime) |
