@@ -59,10 +59,17 @@ order below.
 1. **Real-time transcript ingestion** — not started. Subscribe to
    `transcript.data` / `transcript.partial_data` webhooks during an active
    call; stream partial transcript to a live dashboard view.
-2. **In-meeting chat Q&A agent** — not started. Detect a directed question
-   in the live transcript/chat, run RAG against transcript-so-far + past
-   meetings, respond via Recall's `output_media.chat`. Needs a "is this
-   message for the bot" heuristic to avoid answering unrelated chatter.
+2. **In-meeting chat Q&A agent** — ✅ done. `lib/recall/live-chat.ts`
+   answers a directed "@Tandem …" in the meeting chat panel, scoped to the
+   meeting's category, with per-platform character limits and conversation
+   history read back from `live_chat_messages`. The "is this for the bot"
+   heuristic lives in `lib/agent/trigger.ts`.
+2b. **Live voice agent** — ✅ built, pending a real-call verification.
+   Recall's Output Media streams `app/agent/[token]` into the call; that
+   page reads the realtime transcript websocket, runs the speak/hand/silent
+   gate (`lib/agent/gate.ts`), grounds answers through the existing RAG
+   layer, and speaks via OpenAI Realtime. Spend is capped per meeting in
+   `lib/agent/budget.ts`. Design: `docs/superpowers/specs/2026-09-22-tandem-two-features-design.md`.
 3. **Multi-user auth** — ✅ done. Clerk, resource-based auth (`auth.protect()`
    inside `getCurrentUserId()`, not middleware path-matching — Clerk
    deprecated `createRouteMatcher` mid-build). JIT-links a Clerk account to
