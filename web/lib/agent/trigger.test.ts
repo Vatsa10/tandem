@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { BOT_DISPLAY_NAME, extractQuestion } from "./trigger.ts";
+import { BOT_DISPLAY_NAME, extractQuestion } from "./trigger";
 
 test("the bot answers to its own name", () => {
   assert.equal(BOT_DISPLAY_NAME, "TANDEM");

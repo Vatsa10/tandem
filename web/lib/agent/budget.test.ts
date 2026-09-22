@@ -5,7 +5,7 @@ import {
   MAX_AGENT_SECONDS_PER_MEETING,
   nextGrant,
   remainingSeconds,
-} from "./budget.ts";
+} from "./budget";
 
 test("a fresh meeting has the full budget", () => {
   assert.equal(remainingSeconds(0), MAX_AGENT_SECONDS_PER_MEETING);

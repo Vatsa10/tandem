@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { AGENT_SESSION_TTL_MS, mintToken } from "./token.ts";
+import { AGENT_SESSION_TTL_MS, mintToken } from "./token";
 
 test("tokens carry 32 bytes of entropy, url-safe", () => {
   const token = mintToken();

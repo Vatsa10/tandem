@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { ruleGate, type GateTurn } from "./gate.ts";
+import { ruleGate, type GateTurn } from "./gate";
 
 const empty: GateTurn[] = [];
 
