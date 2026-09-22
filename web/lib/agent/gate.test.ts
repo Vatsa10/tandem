@@ -47,3 +47,16 @@ test("small talk stays silent", () => {
 test("an unrecognised situation never speaks", () => {
   assert.notEqual(ruleGate("mm hmm", empty).decision, "speak");
 });
+
+// Found by the offline pipeline harness: the bot used to treat every
+// utterance after its own answer as a follow-up, so it replied to "cool,
+// thanks" — barging in on the room moving on.
+test("an acknowledgement after the bot speaks is not a follow-up", () => {
+  const transcript: GateTurn[] = [
+    { speaker: "Bob", text: "Tandem, when do we deploy?" },
+    { speaker: "TANDEM", text: "Thursday at four." },
+  ];
+  assert.equal(ruleGate("cool, thanks", transcript).decision, "silent");
+  assert.equal(ruleGate("got it", transcript).decision, "silent");
+  assert.equal(ruleGate("and who owns it?", transcript).decision, "speak");
+});

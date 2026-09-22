@@ -79,7 +79,15 @@ export function ruleGate(
   }
 
   const since = turnsSinceBotSpoke(transcript, botName);
-  if (since === 0) return { decision: "speak", reason: "follow-up to the bot" };
+
+  // The bot just answered. A follow-up question is still for it — but an
+  // acknowledgement ("cool, thanks", "got it") is the room moving on, and
+  // answering that is exactly the barging-in this gate exists to prevent.
+  if (since === 0) {
+    return text.trim().endsWith("?")
+      ? { decision: "speak", reason: "follow-up question to the bot" }
+      : { decision: "silent", reason: "acknowledgement, not a follow-up" };
+  }
 
   // "Bob, can you review my PR?" is a question, but it is aimed at Bob.
   // A leading capitalised name and comma is the clearest signal a human
