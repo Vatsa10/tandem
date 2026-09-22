@@ -18,8 +18,8 @@ test("a message for someone else is ignored", () => {
   assert.equal(extractQuestion("Bob, can you review my PR?"), null);
 });
 
-// The bot answered to "Rika" before the rename. A meeting where someone
-// still says the old name must not wake it up.
-test("the old name no longer triggers", () => {
-  assert.equal(extractQuestion("Rika, what did we agree on?"), null);
+// Only this bot's own name wakes it up — another assistant's name in the
+// room is someone else's business.
+test("another assistant's name does not trigger", () => {
+  assert.equal(extractQuestion("Otto, what did we agree on?"), null);
 });

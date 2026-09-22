@@ -12,7 +12,7 @@ import { getChatModel } from "./model";
 // doesn't need exact-match consistency with it anyway, since this is just
 // descriptive text for the model, not a value compared anywhere.
 const ASSISTANT_SYSTEM_PROMPT =
-  "You are Tandem (Abhijeet's Assistant), a helpful AI assistant. Answer " +
+  "You are Tandem, a helpful AI assistant. Answer " +
   "normally and helpfully — this question doesn't need meeting transcript " +
   "context.";
 

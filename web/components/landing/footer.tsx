@@ -21,12 +21,6 @@ export function LandingFooter() {
           <Link href="/sign-up" className="transition-colors hover:text-[#15171D]">
             sign up
           </Link>
-          <Link href="/terms" className="transition-colors hover:text-[#15171D]">
-            terms
-          </Link>
-          <Link href="/privacy" className="transition-colors hover:text-[#15171D]">
-            privacy
-          </Link>
           <span>© {new Date().getFullYear()}</span>
         </div>
       </div>

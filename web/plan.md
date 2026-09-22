@@ -4,9 +4,9 @@ Recall.ai-powered meeting bot: joins meetings via pasted link or Google Calendar
 records audio/video, captures transcript + participant/meeting metadata, and answers
 questions over transcripts (RAG). Single-user first, multi-user later.
 
-Full architecture/reasoning lives in the approved plan at
-`/Users/abhijeet/.claude/plans/starry-tickling-flask.md` — this file is the taskwise
-tracker split by phase.
+This file is the taskwise tracker split by phase. The current architecture and
+design decisions live in
+`../docs/superpowers/specs/2026-09-22-tandem-two-features-design.md`.
 
 ---
 
@@ -109,7 +109,7 @@ order below.
 ## Phase 2.5 — Meeting Categories + Category-Scoped Chat
 
 Full design in the approved plan at
-`/Users/abhijeet/.claude/plans/resilient-sauteeing-sedgewick.md`. Chat
+the approved design spec. Chat
 currently scopes to one meeting or literally all of them — this adds a
 middle tier so a sequence of related meetings (e.g. recurring freelance
 client calls) keeps its own context instead of mixing with unrelated ones.
