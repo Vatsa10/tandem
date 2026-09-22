@@ -1,6 +1,14 @@
 "use client";
 
-import { ArrowRight, Mic, MicOff, Video, VideoOff } from "lucide-react";
+import {
+  ArrowRight,
+  AudioLines,
+  Mic,
+  MicOff,
+  NotebookPen,
+  Video,
+  VideoOff,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -16,6 +24,10 @@ interface JoinedMeeting {
 export function JoinMeetingForm({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
   const [meetingUrl, setMeetingUrl] = useState("");
+  // 'notetaker' records and answers afterwards; 'live' also speaks up in
+  // the call. Defaulting to notetaker keeps the quiet behaviour the
+  // obvious one — joining a call to talk is the deliberate choice.
+  const [mode, setMode] = useState<"notetaker" | "live">("notetaker");
   const [recordVideo, setRecordVideo] = useState(true);
   const [recordAudio, setRecordAudio] = useState(true);
   const [status, setStatus] = useState<"idle" | "joining" | "error">("idle");
@@ -35,7 +47,7 @@ export function JoinMeetingForm({ compact = false }: { compact?: boolean }) {
     const res = await fetch("/api/bots", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ meetingUrl, recordVideo, recordAudio }),
+      body: JSON.stringify({ meetingUrl, mode, recordVideo, recordAudio }),
     });
 
     const body = await res.json().catch(() => ({}));
@@ -57,6 +69,37 @@ export function JoinMeetingForm({ compact = false }: { compact?: boolean }) {
 
   const toggles = (
     <div className="flex flex-wrap items-center gap-1.5">
+      <button
+        type="button"
+        onClick={() => setMode("notetaker")}
+        disabled={status === "joining"}
+        aria-pressed={mode === "notetaker"}
+        title="Tandem records and answers afterwards"
+        className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[11px] tracking-wide uppercase transition-colors disabled:opacity-50 ${
+          mode === "notetaker"
+            ? "border-ink/25 bg-ink/5 text-ink"
+            : "border-line text-ink-muted"
+        }`}
+      >
+        <NotebookPen className="h-3 w-3" strokeWidth={1.75} />
+        Take notes
+      </button>
+      <button
+        type="button"
+        onClick={() => setMode("live")}
+        disabled={status === "joining"}
+        aria-pressed={mode === "live"}
+        title="Tandem also speaks up during the call"
+        className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[11px] tracking-wide uppercase transition-colors disabled:opacity-50 ${
+          mode === "live"
+            ? "border-ink/25 bg-ink/5 text-ink"
+            : "border-line text-ink-muted"
+        }`}
+      >
+        <AudioLines className="h-3 w-3" strokeWidth={1.75} />
+        Join in
+      </button>
+      <span className="mx-1 h-4 w-px bg-line" aria-hidden />
       <button
         type="button"
         onClick={() => setRecordVideo((v) => !v)}
@@ -169,7 +212,7 @@ export function JoinMeetingForm({ compact = false }: { compact?: boolean }) {
               Send Tandem into a call
             </p>
             <p className="mt-1 max-w-md text-sm text-ink-muted">
-              Paste a meeting link — she joins, records, and captures the
+              Paste a meeting link — it joins, records, and captures the
               transcript.
             </p>
           </div>

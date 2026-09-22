@@ -1,5 +1,5 @@
 import { desc, eq } from "drizzle-orm";
-import { resolveAgentSession } from "@/lib/agent/sessions";
+import { resolveAgentSession } from "@/lib/agent/store";
 import { answerQuestionText } from "@/lib/ai/rag";
 import { db } from "@/lib/db/client";
 import { liveChatMessages, meetings } from "@/lib/db/schema";

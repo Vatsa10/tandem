@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { createAgentSession } from "@/lib/agent/sessions";
+import { createAgentSession } from "@/lib/agent/store";
 import { getCurrentUserId } from "@/lib/auth";
 import { db } from "@/lib/db/client";
 import { env } from "@/lib/env";

@@ -1,5 +1,5 @@
-import { chargeSeconds, nextGrant } from "@/lib/agent/minutes";
-import { resolveAgentSession } from "@/lib/agent/sessions";
+import { nextGrant } from "@/lib/agent/budget";
+import { chargeSeconds, resolveAgentSession } from "@/lib/agent/store";
 import { env } from "@/lib/env";
 
 // Recall loads the agent page with no Clerk session, so this route is
