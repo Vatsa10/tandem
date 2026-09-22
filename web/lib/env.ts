@@ -37,6 +37,11 @@ export const env = {
   get DEEPSEEK_API_KEY() {
     return required("DEEPSEEK_API_KEY");
   },
+  // Realtime speech-to-speech for the live agent page. Only read on the
+  // /api/agent/* paths — the notetaker feature never touches it.
+  get OPENAI_API_KEY() {
+    return required("OPENAI_API_KEY");
+  },
   get MICROSOFT_OAUTH_CLIENT_ID() {
     return required("MICROSOFT_OAUTH_CLIENT_ID");
   },
