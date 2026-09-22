@@ -2,18 +2,12 @@ import { desc, eq } from "drizzle-orm";
 import { answerQuestionText } from "@/lib/ai/rag";
 import { db } from "@/lib/db/client";
 import { liveChatMessages, meetings } from "@/lib/db/schema";
+import { BOT_DISPLAY_NAME, extractQuestion } from "@/lib/agent/trigger";
 import { sendChatMessage } from "./client";
 
-// Single source of truth for the bot's meeting participant name — must
-// match `botName` passed to createBot/scheduleCalendarBot exactly, or
-// the self-message guard below breaks and Tandem starts replying to
-// herself in a loop.
-export const BOT_DISPLAY_NAME = "TANDEM";
-
-// Directed at Tandem if the message starts with her name, optionally
-// preceded by "@" and followed by punctuation/whitespace before the
-// actual question — e.g. "@Tandem, what did we agree on pricing?".
-const TRIGGER_PATTERN = /^@?tandem[,:\s]+(.+)/i;
+// Re-exported so existing callers keep importing the bot identity from the
+// Recall layer while the definition lives with the other pure agent logic.
+export { BOT_DISPLAY_NAME };
 
 const CHAT_CHAR_LIMITS: Record<string, number> = {
   google_meet: 500,
@@ -22,16 +16,10 @@ const CHAT_CHAR_LIMITS: Record<string, number> = {
 };
 const DEFAULT_CHAT_CHAR_LIMIT = 500;
 
-// Each webhook delivery is a separate serverless invocation with no
-// shared memory, so recent conversation context is read back from
+// Each webhook delivery is a separate serverless invocation with no shared
+// memory, so recent conversation context is read back from
 // live_chat_messages rather than held in process.
 const HISTORY_LIMIT = 10;
-
-export function extractQuestion(text: string): string | null {
-  const match = TRIGGER_PATTERN.exec(text.trim());
-  const question = match?.[1]?.trim();
-  return question || null;
-}
 
 function truncate(text: string, limit: number): string {
   if (text.length <= limit) return text;

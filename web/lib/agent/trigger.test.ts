@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { BOT_DISPLAY_NAME, extractQuestion } from "../recall/live-chat.ts";
+import { BOT_DISPLAY_NAME, extractQuestion } from "./trigger.ts";
 
 test("the bot answers to its own name", () => {
   assert.equal(BOT_DISPLAY_NAME, "TANDEM");
@@ -18,6 +18,8 @@ test("a message for someone else is ignored", () => {
   assert.equal(extractQuestion("Bob, can you review my PR?"), null);
 });
 
+// The bot answered to "Rika" before the rename. A meeting where someone
+// still says the old name must not wake it up.
 test("the old name no longer triggers", () => {
-  assert.equal(extractQuestion("Tandem, what did we agree on?"), null);
+  assert.equal(extractQuestion("Rika, what did we agree on?"), null);
 });
