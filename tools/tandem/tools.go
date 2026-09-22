@@ -23,7 +23,9 @@ import (
 // voiceTools is the shared set of function tools exposed to the voice agent
 // (web search + document reading). Used by every realtime backend.
 func voiceTools() []map[string]any {
-	return []map[string]any{
+	// The meeting-memory tools are appended at the end — they exist only when
+	// the web app is configured (see meetingmemory.go).
+	return append([]map[string]any{
 		{
 			"type":        "function",
 			"name":        "web_search",
@@ -87,7 +89,7 @@ func voiceTools() []map[string]any {
 				"required":   []string{"question"},
 			},
 		},
-	}
+	}, memoryTools()...)
 }
 
 // dispatchVoiceTool runs a named voice tool and returns its text result (errors
@@ -100,6 +102,7 @@ func dispatchVoiceTool(ctx context.Context, name, argsJSON string) string {
 		Command     string `json:"command"`
 		Instruction string `json:"instruction"`
 		Question    string `json:"question"`
+		Limit       int    `json:"limit"`
 	}
 	json.Unmarshal([]byte(argsJSON), &a)
 	switch name {
@@ -126,6 +129,10 @@ func dispatchVoiceTool(ctx context.Context, name, argsJSON string) string {
 		return computerUse(ctx, a.Instruction)
 	case "consult_agent":
 		return consultAgent(ctx, a.Question)
+	case "search_meetings":
+		return searchMeetings(ctx, a.Query)
+	case "list_upcoming_meetings":
+		return listUpcomingMeetings(ctx, a.Limit)
 	}
 	return "Unknown tool: " + name
 }
