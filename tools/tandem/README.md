@@ -69,7 +69,7 @@ claude mcp add tandem `
   -e TANDEM_VOICE=realtime `
   -e TANDEM_WEB_URL=https://your-deployment `
   -e TANDEM_API_KEY=tdm_... `
-  -- C:\path	o	andem.exe
+  -- C:\path\to\tandem.exe
 ```
 
 Create the key in the web app under **Settings → API keys**. It is shown once,
